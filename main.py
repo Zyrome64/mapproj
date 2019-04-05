@@ -260,10 +260,13 @@ class list_of_sputniks:
         self.dat = []
         self.index = 0
     def appen(self, coord, spn, type):
+        self.coord = coord
+        self.spn = spn
+        self.type = type
         response = None
         try:
-            host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(coord, spn, type)
-            map_request = host  # 0.002
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(self.coord, self.spn, self.type)
+            map_request = self.host  # 0.002
             response = requests.get(map_request)
 
             if not response:
@@ -286,14 +289,22 @@ class list_of_sputniks:
         self.data.append(map_file)
         self.dat.append(pygame.image.load(map_file))
 
+    def pg_up(self):
+        spn = self.spn.split(',')
+
 
 
 # Инициализируем pygame
 pygame.init()
 h = list_of_sputniks()
-h.appen('29.962672,59.943050', '0.3,0.3', 'sat')
-h.appen('29.962672,59.943050', '0.3,0.3', 'map')
-h.appen('29.962672,59.943050', '0.3,0.3', 'sat,skl')
+coordin = input()
+spns = input()
+# '29.962672,59.943050'    '0.3,0.3'
+coordin = '29.962672,59.943050'
+spns = '0.3,0.3'
+h.appen(coordin, spns, 'sat')
+h.appen(coordin, spns, 'map')
+h.appen(coordin, spns, 'sat,skl')
 screen = pygame.display.set_mode((600, 450))
 flag = True
 while flag:
