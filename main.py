@@ -289,8 +289,18 @@ class list_of_sputniks:
         self.data.append(map_file)
         self.dat.append(pygame.image.load(map_file))
 
-    def pg_up(self):
-        spn = self.spn.split(',')
+
+    def pg_updn(self, minusBool):
+        spn = [str(float(x) - 0.05) if minusBool else str(float(x) + 0.05) for x in self.spn.split(',')]
+        self.spn = ','.join(spn)
+        print(self.spn)
+
+    def move(self, x, y):
+        coor = [float(i) for i in self.coord.split(',')]
+        coor[0] += x
+        coor[1] += y
+        self.coord = coor
+
 
 
 
