@@ -305,7 +305,7 @@ class list_of_sputniks:
 
 
 # Инициализируем pygame
-pygame.init()
+##pygame.init()
 h = list_of_sputniks()
 coordin = input()
 spns = input()
@@ -316,6 +316,7 @@ h.appen(coordin, spns, 'sat')
 h.appen(coordin, spns, 'map')
 h.appen(coordin, spns, 'sat,skl')
 screen = pygame.display.set_mode((600, 450))
+shift = (0, 0)
 flag = True
 while flag:
     for event in pygame.event.get():
@@ -336,13 +337,18 @@ while flag:
             elif event.key == pygame.K_PAGEDOWN:
                 h.pg_updn(True)
             elif event.key == pygame.K_LEFT:
-                h.move(0.01, 0)
+                shift = (-0.01, 0)
             elif event.key == pygame.K_RIGHT:
-                h.move(-0.01, 0)
+                shift = (0.01, 0)
             elif event.key == pygame.K_UP:
-                h.move(0, 0.01)
+                shift = (0, 0.01)
             elif event.key == pygame.K_DOWN:
-                h.move(0, -0.01)
+                shift = (0, -0.01)
+        elif event.type == pygame.KEYUP:
+            elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                shift = (0, 0)
+    if shift != (0, 0):
+        h.move(shift[0], shift[1])
     screen.blit(h.dat[h.index], (0, 0))
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
