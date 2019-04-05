@@ -313,14 +313,26 @@ while flag:
             flag = False
             pygame.quit()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_A:
                 h.index -= 1
                 if h.index < 0:
                     h.index = len(h.dat) - 1
-            if event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_D:
                 h.index += 1
                 if h.index > len(h.dat) - 1:
                     h.index = 0
+            elif event.key == pygame.K_PAGEUP:
+                h.pg_updn(False)
+            elif event.key == pygame.K_PAGEDOWN:
+                h.pg_updn(True)
+            elif event.key == pygame.K_LEFT:
+                h.move(0.01, 0)
+            elif event.key == pygame.K_RIGHT:
+                h.move(-0.01, 0)
+            elif event.key == pygame.K_UP:
+                h.move(0, 0.01)
+            elif event.key == pygame.K_DOWN:
+                h.move(0, -0.01)
     screen.blit(h.dat[h.index], (0, 0))
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
