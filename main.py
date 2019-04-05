@@ -323,11 +323,11 @@ while flag:
             flag = False
             pygame.quit()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_A:
+            if event.key == pygame.K_a:
                 h.index -= 1
                 if h.index < 0:
                     h.index = len(h.dat) - 1
-            elif event.key == pygame.K_D:
+            elif event.key == pygame.K_d:
                 h.index += 1
                 if h.index > len(h.dat) - 1:
                     h.index = 0
