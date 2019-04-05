@@ -258,11 +258,15 @@ class list_of_sputniks:
     def __init__(self):
         self.data = []
         self.dat = []
+        self.types = []
         self.index = 0
+
+
     def appen(self, coord, spn, type):
         self.coord = coord
         self.spn = spn
         self.type = type
+        self.types.append(type)
         response = None
         try:
             self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(self.coord, self.spn, self.type)
@@ -291,16 +295,44 @@ class list_of_sputniks:
 
 
     def pg_updn(self, minusBool):
-        spn = [str(float(x) - 0.05) if minusBool else str(float(x) + 0.05) for x in self.spn.split(',')]
+        spn = [str(round(float(x) - 0.05, 2)) if minusBool else str(round(float(x) + 0.05, 2)) for x in self.spn.split(',')]
         self.spn = ','.join(spn)
         print(self.spn)
 
+
     def move(self, x, y):
         coor = [float(i) for i in self.coord.split(',')]
+        x, y = x * (float(self.spn.split(',')[0]) + 0.7), y * (float(self.spn.split(',')[1]) + 0.7)
         coor[0] += x
         coor[1] += y
-        self.coord = coor
+        self.coord = ','.join(map(str, coor))
 
+
+    def update(self, i):
+        try:
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(self.coord, self.spn, self.types[i])
+            map_request = self.host  # 0.002
+            response = requests.get(map_request)
+
+            if not response:
+                print("Ошибка выполнения запроса:")
+                print(geocoder_request)
+                print("Http статус:", response.status_code, "(", response.reason, ")")
+                sys.exit(1)
+        except:
+            print("Запрос не удалось выполнить. Проверьте наличие сети Интернет.")
+            sys.exit(1)
+
+        # Запишем полученное изображение в файл.
+        map_file = "map.png"
+        try:
+            with open(map_file, "wb") as file:
+                file.write(response.content)
+        except IOError as ex:
+            print("Ошибка записи временного файла:", ex)
+            sys.exit(2)
+        self.data[i] = map_file
+        self.dat[i] = pygame.image.load(map_file)
 
 
 
@@ -311,7 +343,9 @@ coordin = input()
 spns = input()
 # '29.962672,59.943050'    '0.3,0.3'
 coordin = '29.962672,59.943050'
-spns = '0.3,0.3'
+spns = '2.1,2.1'
+
+
 h.appen(coordin, spns, 'sat')
 h.appen(coordin, spns, 'map')
 h.appen(coordin, spns, 'sat,skl')
@@ -335,14 +369,15 @@ while flag:
                 h.pg_updn(False)
             elif event.key == pygame.K_PAGEDOWN:
                 h.pg_updn(True)
-            elif event.key == pygame.K_LEFT:
-                h.move(0.01, 0)
             elif event.key == pygame.K_RIGHT:
+                h.move(0.01, 0)
+            elif event.key == pygame.K_LEFT:
                 h.move(-0.01, 0)
             elif event.key == pygame.K_UP:
                 h.move(0, 0.01)
             elif event.key == pygame.K_DOWN:
                 h.move(0, -0.01)
+    h.update(h.index)
     screen.blit(h.dat[h.index], (0, 0))
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
