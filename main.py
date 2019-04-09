@@ -354,6 +354,19 @@ spns = input()
 coordin = '29.962672,59.943050'
 spns = '1'
 
+size = (640, 480)
+screen = pygame.display.set_mode(size)
+font = pygame.font.Font(None, 32)
+clock = pygame.time.Clock()
+input_box = pygame.Rect(5, 5, 140, 32)
+back_text = pygame.Rect(2, 2, size[0], 38)
+color_inactive = pygame.Color('lightskyblue3')
+color_active = pygame.Color('dodgerblue2')
+color = color_inactive
+active = False
+text = ''
+done = False
+
 
 h.appen(coordin, spns, 'sat')
 h.appen(coordin, spns, 'map')
@@ -365,15 +378,27 @@ while flag:
         if event.type == pygame.QUIT:
             flag = False
             pygame.quit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                h.index -= 1
-                if h.index < 0:
-                    h.index = len(h.dat) - 1
-            elif event.key == pygame.K_d:
-                h.index += 1
-                if h.index > len(h.dat) - 1:
-                    h.index = 0
+
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if input_box.collidepoint(event.pos):
+                active = not active
+            else:
+                active = False
+
+            color = color_active if active else color_inactive
+
+
+        if event.type == pygame.KEYDOWN
+            if not active:
+                if event.key == pygame.K_a:
+                    h.index -= 1
+                    if h.index < 0:
+                        h.index = len(h.dat) - 1
+                elif event.key == pygame.K_d:
+                    h.index += 1
+                    if h.index > len(h.dat) - 1:
+                        h.index = 0
             elif event.key == pygame.K_PAGEUP:
                 h.pg_updn(False)
             elif event.key == pygame.K_PAGEDOWN:
@@ -386,8 +411,27 @@ while flag:
                 h.move(0, 0.01)
             elif event.key == pygame.K_DOWN:
                 h.move(0, -0.01)
+
+            if active:
+                if event.key == pygame.K_RETURN:
+                    print(text)
+                    text = ''
+                    active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    text = text[:-1]
+                else:
+                    text += event.unicode
+
+    screen.fill((30, 30, 30))
     h.update(h.index)
     screen.blit(h.dat[h.index], (0, 0))
+    pygame.draw.rect(screen,  (25, 25, 25, 1), back_text, 0)
+    txt_surface = font.render(text, True, color)
+    width = max(200, txt_surface.get_width() + 10)
+    input_box.w = width
+    screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+    # Blit the input_box rect.
+    pygame.draw.rect(screen, color, input_box, 2)
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
 pygame.quit()
@@ -401,4 +445,67 @@ pygame.quit()
 #             '30.310705,59.945413'])
 
 
+
+
+
+
+
+
+# import pygame as pg
+#
+#
+# def main():
+#     screen = pg.display.set_mode((640, 480))
+#     font = pg.font.Font(None, 32)
+#     clock = pg.time.Clock()
+#     input_box = pg.Rect(100, 100, 140, 32)
+#     color_inactive = pg.Color('lightskyblue3')
+#     color_active = pg.Color('dodgerblue2')
+#     color = color_inactive
+#     active = False
+#     text = ''
+#     done = False
+#
+#     while not done:
+#         for event in pg.event.get():
+#             if event.type == pg.QUIT:
+#                 done = True
+#             if event.type == pg.MOUSEBUTTONDOWN:
+#                 # If the user clicked on the input_box rect.
+#                 if input_box.collidepoint(event.pos):
+#                     # Toggle the active variable.
+#                     active = not active
+#                 else:
+#                     active = False
+#                 # Change the current color of the input box.
+#                 color = color_active if active else color_inactive
+#             if event.type == pg.KEYDOWN:
+#                 if active:
+#                     if event.key == pg.K_RETURN:
+#                         print(text)
+#                         text = ''
+#                     elif event.key == pg.K_BACKSPACE:
+#                         text = text[:-1]
+#                     else:
+#                         text += event.unicode
+#
+#         screen.fill((30, 30, 30))
+#         # Render the current text.
+#         txt_surface = font.render(text, True, color)
+#         # Resize the box if the text is too long.
+#         width = max(200, txt_surface.get_width()+10)
+#         input_box.w = width
+#         # Blit the text.
+#         screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
+#         # Blit the input_box rect.
+#         pg.draw.rect(screen, color, input_box, 2)
+#
+#         pg.display.flip()
+#         clock.tick(30)
+#
+#
+# if __name__ == '__main__':
+#     pg.init()
+#     main()
+#     pg.quit()
 
