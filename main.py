@@ -253,25 +253,97 @@ def sputnik_im(coord, spn, type, markers, lines):
     os.remove(map_file)
 
 
+def address_full(str_):
+    geocoder_request = "http://geocode-maps.yandex.ru/1.x/?geocode={}&format=json".format(str_)
+    response = None
+    try:
+        response = requests.get(geocoder_request)
+        if response:
+            # Преобразуем ответ в json-объект
+            json_response = response.json()
+            data = {}
+            # Получаем первый топоним из ответа геокодера.
+            # Согласно описанию ответа, он находится по следующему пути:
+            toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+            # Полный адрес топонима:
+
+            try:
+                toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+                data["adress"] = toponym_address
+            except:
+                pass
+
+            try:
+                toponym_address1 = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]["Components"][1]["name"]
+                data["okrug"] = toponym_address1
+            except:
+                pass
+
+            try:
+                toponym_address2 = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]["Components"][2]["name"]
+                data["oblast"] = toponym_address2
+            except:
+                pass
+
+            try:
+                toponym_address3 = \
+                    toponym["metaDataProperty"]["GeocoderMetaData"]["AddressDetails"]["Country"]["AdministrativeArea"][
+                        "Locality"]["Thoroughfare"]["Premise"]["PostalCode"]["PostalCodeNumber"]
+                data["postal code"] = toponym_address3
+            except:
+                pass
+
+            # Координаты центра топонима:
+            try:
+                toponym_coodrinates = toponym["Point"]["pos"]
+                data["pos"] = toponym_coodrinates
+            except:
+                pass
+
+            # Печатаем извлечённые из ответа поля:
+            return (data)
+        else:
+            print("Ошибка выполнения запроса:")
+            print(geocoder_request)
+            print("Http статус:", response.status_code, "(", response.reason, ")")
+    except:
+        print("Запрос не удалось выполнить. Проверьте подключение к сети Интернет.")
+
+
 
 class list_of_sputniks:
     def __init__(self):
         self.data = []
         self.dat = []
         self.types = []
+        self.markers = []
+        self.lines = []
         self.speed = [0, 200, 90, 60, 20, 10, 8, 6, 4, 2, 1.5, 1.2, 1, 0.8, 0.7, 0.4, 0.15, 0.06, 0.02, 0.01, 0.005]
         self.index = 0
 
 
-    def appen(self, coord, spn, type):
+    def appen(self, coord, spn, type, markers, lines):
         self.coord = coord
         self.spn = spn
         self.type = type
         self.b = int(17 * (0.9 ** (int(self.spn) - 1)))
+        self.markers = markers
+        self.lines = lines
         self.types.append(type)
         response = None
         try:
             self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.type)
+            if markers:
+                self.host += '&pt='
+                for i in range(len(markers)):
+                    if i < len(markers) - 1:
+                        self.host += markers[i] + ',pm2rdm~'
+                    else:
+                        self.host += markers[i] + ',pm2rdm'
+            if lines:
+                self.host += '&pl=c:ec473fFF,f:00FF00A0, w:7'
+                for x in lines:
+                    self.host += ',' + x
             map_request = self.host  # 0.002
             response = requests.get(map_request)
 
@@ -302,7 +374,7 @@ class list_of_sputniks:
             spn = int(self.spn) - 1
         else:
             spn = int(self.spn) + 1
-        if float(spn) < 20 and float(spn) > 0:
+        if float(spn) < 19 and float(spn) > 0:
             self.spn = str(spn)
             print(self.spn)
 
@@ -316,10 +388,23 @@ class list_of_sputniks:
         print(','.join(map(str, coor)))
         self.coord = ','.join(map(str, coor))
 
+    def add_mark(self, coor):
+        self.markers.append(coor)
 
     def update(self, i):
         try:
             self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[i])
+            if self.markers:
+                self.host += '&pt='
+                for i in range(len(self.markers)):
+                    if i < len(self.markers) - 1:
+                        self.host += self.markers[i] + ',pm2rdm~'
+                    else:
+                        self.host += self.markers[i] + ',pm2rdm'
+            if self.lines:
+                self.host += '&pl=c:ec473fFF,f:00FF00A0, w:7'
+                for x in self.lines:
+                    self.host += ',' + x
             map_request = self.host  # 0.002
             response = requests.get(map_request)
 
@@ -357,21 +442,23 @@ spns = '1'
 size = (640, 480)
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font(None, 32)
+info_font = pygame.font.Font(None, 10)
 clock = pygame.time.Clock()
 input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
 back_text = pygame.Rect(0, 0, size[0], 42)
-info_text = pygame.Rect(5, 50, 140, 32)
+info_rect = pygame.Rect(100, 100, 100, 100)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
 active = False
 text = ''
+info_text = ''
 done = False
 
 
-h.appen(coordin, spns, 'sat')
-h.appen(coordin, spns, 'map')
-h.appen(coordin, spns, 'sat,skl')
+h.appen(coordin, spns, 'sat', [], [])
+h.appen(coordin, spns, 'map', [], [])
+h.appen(coordin, spns, 'sat,skl', [], [])
 screen = pygame.display.set_mode((600, 450))
 shift = (0, 0)
 flag = True
@@ -402,6 +489,7 @@ while flag:
             else:
                 if event.key == pygame.K_RETURN:
                     print(text)
+                    info_text = address_full(text)['']
                     text = ''
                     active = False
                 elif event.key == pygame.K_BACKSPACE:
@@ -430,14 +518,21 @@ while flag:
     screen.fill((30, 30, 30))
     h.update(h.index)
     screen.blit(h.dat[h.index], (0, 0))
-    pygame.draw.rect(screen,  (25, 25, 25, 1), back_text, 0)
+
+    pygame.draw.rect(screen,  (40, 40, 40, 1), back_text)
+    pygame.draw.rect(screen, (40, 40, 40, 1), info_rect)
+
     txt_surface = font.render(text, True, color)
+    adr_surface = info_font.render(info_text, True, color)
+
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
     input_box.x = int(size[0] - input_box.w - 50)
+
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-    # Blit the input_box rect.
+    screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
     pygame.draw.rect(screen, color, input_box, 2)
+
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
 pygame.quit()
@@ -514,4 +609,7 @@ pygame.quit()
 #     pg.init()
 #     main()
 #     pg.quit()
+
+
+
 
