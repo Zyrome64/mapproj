@@ -297,7 +297,6 @@ class list_of_sputniks:
 
 
     def pg_updn(self, minusBool):
-        self.b = int(17 * (0.9 ** (int(self.spn) - 1)))
 
         if minusBool:
             spn = int(self.spn) - 1
@@ -348,8 +347,8 @@ class list_of_sputniks:
 # Инициализируем pygame
 pygame.init()
 h = list_of_sputniks()
-coordin = input()
-spns = input()
+# coordin = input()
+# spns = input()
 # '29.962672,59.943050'    '0.3,0.3'
 coordin = '29.962672,59.943050'
 spns = '1'
@@ -378,8 +377,6 @@ while flag:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             flag = False
-            pygame.quit()
-
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if input_box.collidepoint(event.pos):
@@ -400,7 +397,7 @@ while flag:
                     h.index += 1
                     if h.index > len(h.dat) - 1:
                         h.index = 0
-            elif event.key == pygame.K_PAGEUP:
+            if event.key == pygame.K_PAGEUP:
                 h.pg_updn(False)
             elif event.key == pygame.K_PAGEDOWN:
                 h.pg_updn(True)
