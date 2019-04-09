@@ -259,6 +259,7 @@ class list_of_sputniks:
         self.data = []
         self.dat = []
         self.types = []
+        self.speed = [0, 200, 90, 60, 20, 10, 8, 6, 4, 2, 1.5, 1.2, 1, 0.8, 0.7, 0.4, 0.15, 0.06, 0.02, 0.01, 0.005]
         self.index = 0
 
 
@@ -266,10 +267,11 @@ class list_of_sputniks:
         self.coord = coord
         self.spn = spn
         self.type = type
+        self.b = int(17 * (0.9 ** (int(self.spn) - 1)))
         self.types.append(type)
         response = None
         try:
-            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(self.coord, self.spn, self.type)
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.type)
             map_request = self.host  # 0.002
             response = requests.get(map_request)
 
@@ -295,14 +297,21 @@ class list_of_sputniks:
 
 
     def pg_updn(self, minusBool):
-        spn = [str(round(float(x) - 0.05, 2)) if minusBool else str(round(float(x) + 0.05, 2)) for x in self.spn.split(',')]
-        self.spn = ','.join(spn)
-        print(self.spn)
+        self.b = int(17 * (0.9 ** (int(self.spn) - 1)))
+
+        if minusBool:
+            spn = int(self.spn) - 1
+        else:
+            spn = int(self.spn) + 1
+        if float(spn) < 20:
+            self.spn = str(spn)
+            print(self.spn)
+
 
 
     def move(self, x, y):
         coor = [float(i) for i in self.coord.split(',')]
-        x, y = x * (float(self.spn.split(',')[0]) + 0.7), y * (float(self.spn.split(',')[1]) + 0.7)
+        x, y = x * self.speed[int(self.spn)], y * self.speed[int(self.spn)]
         coor[0] += x
         coor[1] += y
         self.coord = ','.join(map(str, coor))
@@ -310,7 +319,7 @@ class list_of_sputniks:
 
     def update(self, i):
         try:
-            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&spn={}&l={}'.format(self.coord, self.spn, self.types[i])
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[i])
             map_request = self.host  # 0.002
             response = requests.get(map_request)
 
@@ -343,7 +352,7 @@ coordin = input()
 spns = input()
 # '29.962672,59.943050'    '0.3,0.3'
 coordin = '29.962672,59.943050'
-spns = '2.1,2.1'
+spns = '1'
 
 
 h.appen(coordin, spns, 'sat')
