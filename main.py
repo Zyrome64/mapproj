@@ -442,11 +442,11 @@ spns = '1'
 size = (640, 480)
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font(None, 32)
-info_font = pygame.font.Font(None, 10)
+info_font = pygame.font.Font(None, 20)
 clock = pygame.time.Clock()
 input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
 back_text = pygame.Rect(0, 0, size[0], 42)
-info_rect = pygame.Rect(100, 100, 100, 100)
+info_rect = pygame.Rect(5, 47, 150, 200)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -462,6 +462,7 @@ h.appen(coordin, spns, 'sat,skl', [], [])
 screen = pygame.display.set_mode((600, 450))
 shift = (0, 0)
 flag = True
+do = True
 while flag:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -482,24 +483,38 @@ while flag:
                     h.index -= 1
                     if h.index < 0:
                         h.index = len(h.dat) - 1
+                    do = True
                 elif event.key == pygame.K_d:
                     h.index += 1
                     if h.index > len(h.dat) - 1:
                         h.index = 0
+                    do = True
+
             else:
                 if event.key == pygame.K_RETURN:
                     print(text)
-                    info_text = address_full(text)['']
-                    text = ''
-                    active = False
+                    try:
+                        try:
+                            float(text.split(',')[0])
+                            info_text = address_full(text)['adress']
+                        except:
+                            info_text = address_full(text)['pos']
+                        text = ''
+                        active = False
+                    except  Exception as a:
+                        print(a)
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
                 else:
                     text += event.unicode
+
             if event.key == pygame.K_PAGEUP:
                 h.pg_updn(False)
+                do = True
             elif event.key == pygame.K_PAGEDOWN:
                 h.pg_updn(True)
+                do = True
+
             elif event.key == pygame.K_RIGHT:
                 shift = (0.01, 0)
             elif event.key == pygame.K_LEFT:
@@ -512,12 +527,19 @@ while flag:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     shift = (0, 0)
     if shift != (0, 0):
+        do = True
         h.move(shift[0], shift[1])
         shift = (0, 0)
+        if not active:
+            info_text = h.coord
             
 
     screen.fill((30, 30, 30))
-    h.update(h.index)
+
+    if do:
+        h.update(h.index)
+        do = False
+
     screen.blit(h.dat[h.index], (0, 0))
 
     pygame.draw.rect(screen,  (40, 40, 40, 1), back_text)
