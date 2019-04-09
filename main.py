@@ -372,6 +372,7 @@ h.appen(coordin, spns, 'sat')
 h.appen(coordin, spns, 'map')
 h.appen(coordin, spns, 'sat,skl')
 screen = pygame.display.set_mode((600, 450))
+shift = (0, 0)
 flag = True
 while flag:
     for event in pygame.event.get():
@@ -397,20 +398,7 @@ while flag:
                     h.index += 1
                     if h.index > len(h.dat) - 1:
                         h.index = 0
-            if event.key == pygame.K_PAGEUP:
-                h.pg_updn(False)
-            elif event.key == pygame.K_PAGEDOWN:
-                h.pg_updn(True)
-            elif event.key == pygame.K_RIGHT:
-                h.move(0.01, 0)
-            elif event.key == pygame.K_LEFT:
-                h.move(-0.01, 0)
-            elif event.key == pygame.K_UP:
-                h.move(0, 0.01)
-            elif event.key == pygame.K_DOWN:
-                h.move(0, -0.01)
-
-            if active:
+            else:
                 if event.key == pygame.K_RETURN:
                     print(text)
                     text = ''
@@ -419,6 +407,24 @@ while flag:
                     text = text[:-1]
                 else:
                     text += event.unicode
+            if event.key == pygame.K_PAGEUP:
+                h.pg_updn(False)
+            elif event.key == pygame.K_PAGEDOWN:
+                h.pg_updn(True)
+            elif event.key == pygame.K_RIGHT:
+                shift = (0.01, 0)
+            elif event.key == pygame.K_LEFT:
+                shift = (-0.01, 0)
+            elif event.key == pygame.K_UP:
+                shift = (0, 0.01)
+            elif event.key == pygame.K_DOWN:
+                shift = (0, -0.01)
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    shift = (0, 0)
+    if shift != (0, 0):
+        h.move(shift[0], shift[1])
+            
 
     screen.fill((30, 30, 30))
     h.update(h.index)
