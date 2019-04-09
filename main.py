@@ -303,7 +303,7 @@ class list_of_sputniks:
             spn = int(self.spn) - 1
         else:
             spn = int(self.spn) + 1
-        if float(spn) < 20:
+        if float(spn) < 20 and float(spn) > 0:
             self.spn = str(spn)
             print(self.spn)
 
