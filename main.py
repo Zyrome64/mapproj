@@ -425,6 +425,7 @@ while flag:
                     shift = (0, 0)
     if shift != (0, 0):
         h.move(shift[0], shift[1])
+        shift = (0, 0)
             
 
     screen.fill((30, 30, 30))
