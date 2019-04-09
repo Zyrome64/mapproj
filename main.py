@@ -358,8 +358,9 @@ size = (640, 480)
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
-input_box = pygame.Rect(5, 5, 140, 32)
-back_text = pygame.Rect(2, 2, size[0], 38)
+input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
+back_text = pygame.Rect(0, 0, size[0], 42)
+info_text = pygame.Rect(5, 50, 140, 32)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -389,7 +390,7 @@ while flag:
             color = color_active if active else color_inactive
 
 
-        if event.type == pygame.KEYDOWN
+        if event.type == pygame.KEYDOWN:
             if not active:
                 if event.key == pygame.K_a:
                     h.index -= 1
@@ -429,6 +430,7 @@ while flag:
     txt_surface = font.render(text, True, color)
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
+    input_box.x = int(size[0] - input_box.w - 50)
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     # Blit the input_box rect.
     pygame.draw.rect(screen, color, input_box, 2)
