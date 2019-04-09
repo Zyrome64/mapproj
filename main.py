@@ -313,6 +313,7 @@ class list_of_sputniks:
         x, y = x * self.speed[int(self.spn)], y * self.speed[int(self.spn)]
         coor[0] += x
         coor[1] += y
+        print(','.join(map(str, coor)))
         self.coord = ','.join(map(str, coor))
 
 
@@ -350,7 +351,7 @@ h = list_of_sputniks()
 # coordin = input()
 # spns = input()
 # '29.962672,59.943050'    '0.3,0.3'
-coordin = '29.962672,59.943050'
+coordin = '144.33067200000022,43.94305'
 spns = '1'
 
 size = (640, 480)
