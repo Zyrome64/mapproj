@@ -43,13 +43,14 @@ class Checkbox:
         self._draw_button_text()
 
     def _update(self, event_object):
-        x, y = event_object.pos
-        # self.x, self.y, 12, 12
-        px, py, w, h = self.checkbox_obj  # getting check box dimensions
-        if px < x < px + w and px < x < px + w:
-            self.active = True
-        else:
-            self.active = False
+        x, y = pg.mouse.get_pos()
+        px, py, w, h = self.checkbox_obj
+        if px < x < px + w and py < y < py + w:
+            if self.checked:
+                self.checked = False
+            else:
+                self.checked = True
+            print(str(self.caption) + ' toggle ' + str(self.checked))
 
     def _mouse_up(self):
             if self.active and not self.checked and self.click:
@@ -68,10 +69,6 @@ class Checkbox:
     def update_checkbox(self, event_object):
         if event_object.type == pg.MOUSEBUTTONDOWN:
             self.click = True
-            # self._mouse_down()
-        if event_object.type == pg.MOUSEBUTTONUP:
-            self._mouse_up()
-        if event_object.type == pg.MOUSEMOTION:
             self._update(event_object)
 
     def is_checked(self):
