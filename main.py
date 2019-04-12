@@ -400,6 +400,7 @@ def address_full(str_):
 
 class list_of_sputniks:
     def __init__(self):
+        self.trf = False
         self.data = []
         self.dat = []
         self.types = ['sat', 'map', 'sat,skl']
@@ -491,6 +492,8 @@ class list_of_sputniks:
     def update(self):
         try:
             self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[self.index])
+            if self.trf:
+                self.host = self.host + ',trf'
             if self.markers:
                 self.host += '&pt='
                 for i in range(len(self.markers)):
@@ -611,6 +614,10 @@ while flag:
                     h.index += 1
                     if h.index > len(h.dat) - 1:
                         h.index = 0
+                    do = True
+
+                if event.key == pygame.K_t:
+                    h.trf = not h.trf
                     do = True
 
             else:
