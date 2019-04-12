@@ -600,17 +600,25 @@ while flag:
     txt_surface = font.render(text, True, color)
     adr_surface = info_font.render(info_text, True, color_inactive)
     coor_surface = infocoor_font.render(coor_text, True, color_inactive)
+    chkbox_text = info_font.render('Почтовый индекс', True, color_inactive)
+    btn_text = pygame.font.Font(None, 18).render('Сбросить результаты', True, (0, 255, 255))
 
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
     input_box.x = int(size[0] - input_box.w - 50)
 
+    pygame.draw.rect(screen, color, input_box, 2)
+    pygame.draw.rect(screen, (255, 0, 0), btn_rect)
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
     screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
-    pygame.draw.rect(screen, color, input_box, 2)
+    screen.blit(chkbox_text, (15 + chkbox.x, chkbox.y - 1))
+    screen.blit(btn_text, (btn_rect[0], btn_rect[1] + 5))
+    
+    
     chkbox.render_checkbox()
-    pygame.draw.rect(screen, (255, 0, 0), btn_rect)
+    
+
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
     clock.tick(FPS)
