@@ -1,9 +1,95 @@
 import pygame
-import checkbox
 import requests
 import sys
 import os
 import math
+import pygame as pg
+
+
+
+
+pg.init()
+class Checkbox:
+    def __init__(self, surface, x, y, color=(230, 230, 230), caption="", outline_color=(0, 0, 0),
+                 check_color=(0, 0, 0), font_size=22, font_color=(0, 0, 0), text_offset=(28, 1)):
+        self.surface = surface
+        self.x = x
+        self.y = y
+        self.color = color
+        self.caption = caption
+        self.oc = outline_color
+        self.cc = check_color
+        self.fs = font_size
+        self.fc = font_color
+        self.to = text_offset
+        # checkbox object
+        self.checkbox_obj = pg.Rect(self.x, self.y, 12, 12)
+        self.checkbox_outline = self.checkbox_obj.copy()
+        # variables to test the different states of the checkbox
+        self.checked = False
+        self.active = False
+        self.unchecked = True
+        self.click = False
+
+    def _draw_button_text(self):
+        self.font = pg.font.Font(None, self.fs)
+        self.font_surf = self.font.render(self.caption, True, self.fc)
+        w, h = self.font.size(self.caption)
+        self.font_pos = (self.x + 12 / 2 - w / 2 + self.to[0], self.y + 12 / 2 - h / 2 + self.to[1])
+        self.surface.blit(self.font_surf, self.font_pos)
+
+    def render_checkbox(self):
+        if self.checked:
+            pg.draw.rect(self.surface, self.color, self.checkbox_obj)
+            pg.draw.rect(self.surface, self.oc, self.checkbox_outline, 1)
+            pg.draw.circle(self.surface, self.cc, (self.x + 6, self.y + 6), 4)
+
+        elif self.unchecked:
+            pg.draw.rect(self.surface, self.color, self.checkbox_obj)
+            pg.draw.rect(self.surface, self.oc, self.checkbox_outline, 1)
+        self._draw_button_text()
+
+    def _update(self, event_object):
+        x, y = pg.mouse.get_pos()
+        px, py, w, h = self.checkbox_obj
+        if px < x < px + w and py < y < py + w:
+            if self.checked:
+                self.checked = False
+            else:
+                self.checked = True
+            print(str(self.caption) + ' toggle ' + str(self.checked))
+
+    def _mouse_up(self):
+            if self.active and not self.checked and self.click:
+                    self.checked = True
+            elif self.checked:
+                self.checked = False
+                self.unchecked = True
+
+            if self.click is True and self.active is False:
+                if self.checked:
+                    self.checked = True
+                if self.unchecked:
+                    self.unchecked = True
+                self.active = False
+
+    def update_checkbox(self, event_object):
+        self.click = True
+        self._update(event_object)
+
+    def is_checked(self):
+        if self.checked is True:
+            return True
+        else:
+            return False
+
+    def is_unchecked(self):
+        if self.checked is False:
+            return True
+        else:
+            return False
+
+
 
 # Ищем город Якутск, ответ просим выдать в формате json.
 
@@ -461,7 +547,7 @@ clock = pygame.time.Clock()
 input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
 back_text = pygame.Rect(0, 0, size[0], 42)
 info_rect = pygame.Rect(5, 47, 150, 200)
-chkbox = checkbox.Checkbox(screen, info_rect.left + 10, info_rect.bottom - 50)
+chkbox = Checkbox(screen, info_rect.left + 10, info_rect.bottom - 50)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -594,8 +680,6 @@ while flag:
                 arrow_keys_pressed['up'] = False
             elif event.key == pygame.K_DOWN:
                 arrow_keys_pressed['down'] = False
-##            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-##                shift = [0, 0]
     if arrow_keys_pressed['right']:
         h.move(0.01, 0)
         do = True
@@ -608,12 +692,6 @@ while flag:
     elif arrow_keys_pressed['down']:
         h.move(0, -0.01)
         do = True
-##    if shift != [0, 0]:
-##        do = True
-##        h.move(shift[0], shift[1])
-##        shift = (0, 0)
-##    if not active:
-##        info_text = h.coord
         
 
     screen.fill((30, 30, 30))
@@ -661,80 +739,3 @@ while flag:
     pygame.display.flip()
     clock.tick(FPS)
 pygame.quit()
-# Рисуем картинку, загружаемую из только что созданного файла.
-
-
-
-# sputnik_im('29.962672,59.943050', '0.3,0.3', 'map',
-#            ['37.439944,55.817950', '37.560154,55.791408', '37.554787,55.715562'],
-#            ['30.015249,59.865990', '30.114517,59.946595', '30.191421,59.970402', '30.273819,59.952891',
-#             '30.310705,59.945413'])
-
-
-
-
-
-
-
-
-# import pygame as pg
-#
-#
-# def main():
-#     screen = pg.display.set_mode((640, 480))
-#     font = pg.font.Font(None, 32)
-#     clock = pg.time.Clock()
-#     input_box = pg.Rect(100, 100, 140, 32)
-#     color_inactive = pg.Color('lightskyblue3')
-#     color_active = pg.Color('dodgerblue2')
-#     color = color_inactive
-#     active = False
-#     text = ''
-#     done = False
-#
-#     while not done:
-#         for event in pg.event.get():
-#             if event.type == pg.QUIT:
-#                 done = True
-#             if event.type == pg.MOUSEBUTTONDOWN:
-#                 # If the user clicked on the input_box rect.
-#                 if input_box.collidepoint(event.pos):
-#                     # Toggle the active variable.
-#                     active = not active
-#                 else:
-#                     active = False
-#                 # Change the current color of the input box.
-#                 color = color_active if active else color_inactive
-#             if event.type == pg.KEYDOWN:
-#                 if active:
-#                     if event.key == pg.K_RETURN:
-#                         print(text)
-#                         text = ''
-#                     elif event.key == pg.K_BACKSPACE:
-#                         text = text[:-1]
-#                     else:
-#                         text += event.unicode
-#
-#         screen.fill((30, 30, 30))
-#         # Render the current text.
-#         txt_surface = font.render(text, True, color)
-#         # Resize the box if the text is too long.
-#         width = max(200, txt_surface.get_width()+10)
-#         input_box.w = width
-#         # Blit the text.
-#         screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
-#         # Blit the input_box rect.
-#         pg.draw.rect(screen, color, input_box, 2)
-#
-#         pg.display.flip()
-#         clock.tick(30)
-#
-#
-# if __name__ == '__main__':
-#     pg.init()
-#     main()
-#     pg.quit()
-
-
-
-
