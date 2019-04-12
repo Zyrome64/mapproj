@@ -315,24 +315,22 @@ class list_of_sputniks:
     def __init__(self):
         self.data = []
         self.dat = []
-        self.types = []
+        self.types = ['sat', 'map', 'sat,skl']
         self.markers = []
         self.lines = []
-        self.speed = [0, 200, 90, 60, 20, 10, 8, 6, 4, 2, 1.5, 1.2, 1, 0.8, 0.7, 0.4, 0.15, 0.06, 0.02, 0.01, 0.005]
+        self.speed = [0, 300, 90, 60, 20, 10, 8, 6, 4, 2, 1.5, 1.2, 1, 0.8, 0.7, 0.4, 0.15, 0.06, 0.02, 0.01, 0.005]
         self.index = 0
 
 
     def appen(self, coord, spn, type, markers, lines):
         self.coord = coord
         self.spn = spn
-        self.type = type
         self.b = int(17 * (0.9 ** (int(self.spn) - 1)))
-        self.markers = markers
+        self.markers += markers
         self.lines = lines
-        self.types.append(type)
         response = None
         try:
-            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.type)
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[self.index])
             if markers:
                 self.host += '&pt='
                 for i in range(len(markers)):
@@ -386,14 +384,18 @@ class list_of_sputniks:
         coor[0] += x
         coor[1] += y
         print(','.join(map(str, coor)))
+        if coor[0] > 180:
+            coor[0] = 179
+        if coor[0] < 90:
+            coor[0] = 89
         self.coord = ','.join(map(str, coor))
 
     def add_mark(self, coor):
         self.markers.append(coor)
 
-    def update(self, i):
+    def update(self):
         try:
-            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[i])
+            self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[self.index])
             if self.markers:
                 self.host += '&pt='
                 for i in range(len(self.markers)):
@@ -401,10 +403,12 @@ class list_of_sputniks:
                         self.host += self.markers[i] + ',pm2rdm~'
                     else:
                         self.host += self.markers[i] + ',pm2rdm'
+                print(self.host)
             if self.lines:
                 self.host += '&pl=c:ec473fFF,f:00FF00A0, w:7'
                 for x in self.lines:
                     self.host += ',' + x
+
             map_request = self.host  # 0.002
             response = requests.get(map_request)
 
@@ -425,8 +429,8 @@ class list_of_sputniks:
         except IOError as ex:
             print("Ошибка записи временного файла:", ex)
             sys.exit(2)
-        self.data[i] = map_file
-        self.dat[i] = pygame.image.load(map_file)
+        self.data[self.index] = map_file
+        self.dat[self.index] = pygame.image.load(map_file)
 
 
 
@@ -501,8 +505,9 @@ while flag:
                         except:
                             print(address_full(text)['pos'])
                             info_text = address_full(text)['pos']
-##                            h.coord = list(map(float, address_full(text)['pos'].split()))[::-1]
                             do = True
+                        h.coord = ','.join(address_full(text)['pos'].split())
+                        h.markers.append(','.join(address_full(text)['pos'].split()))
                         text = ''
                         active = False
                     except  Exception as a:
@@ -569,7 +574,7 @@ while flag:
     screen.fill((30, 30, 30))
 
     if do:
-        h.update(h.index)
+        h.update()
         do = False
 
     screen.blit(h.dat[h.index], (0, 0))
