@@ -391,12 +391,16 @@ class list_of_sputniks:
             coor[0] = -175
         if coor[1] < -85:
             coor[1] = -85
-        elif coor[1] < 85:
+        elif coor[1] > 85:
             coor[1] = 85
         self.coord = ','.join(map(str, coor))
 
     def add_mark(self, coor):
         self.markers.append(coor)
+
+    def remove_marker(self):
+        if self.markers:
+            self.markers.pop(0)
 
     def update(self):
         try:
@@ -503,7 +507,7 @@ while flag:
                 try:
                     postal_code = address_full(city)['postal code']
                 except Exception as a:
-                    print(a)
+                    postal_code = 'No PCode'
             else:
                 postal_code = ''
 
@@ -544,7 +548,9 @@ while flag:
                             try:
                                 postal_code = address_full(text)['postal code']
                             except Exception as a:
-                                print(a)
+                                postal_code = 'No PCode'
+                        else:
+                            postal_code = ''
                         h.spn = '8'
                         city = text
                         text = ''
