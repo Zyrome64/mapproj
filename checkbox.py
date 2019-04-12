@@ -67,9 +67,8 @@ class Checkbox:
                 self.active = False
 
     def update_checkbox(self, event_object):
-        if event_object.type == pg.MOUSEBUTTONDOWN:
-            self.click = True
-            self._update(event_object)
+        self.click = True
+        self._update(event_object)
 
     def is_checked(self):
         if self.checked is True:

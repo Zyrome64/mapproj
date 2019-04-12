@@ -385,10 +385,14 @@ class list_of_sputniks:
         coor[0] += x
         coor[1] += y
         print(','.join(map(str, coor)))
-        if coor[0] > 180:
-            coor[0] = 179
-        if coor[0] < 90:
-            coor[0] = 89
+        if coor[0] > 175:
+            coor[0] = 175
+        elif coor[0] < -175:
+            coor[0] = -175
+        if coor[1] < -85:
+            coor[1] = -85
+        elif coor[1] < 85:
+            coor[1] = 85
         self.coord = ','.join(map(str, coor))
 
     def add_mark(self, coor):
@@ -462,8 +466,9 @@ text = ''
 info_text = ''
 coor_text = ''
 postal_code = ''
+city = ''
 done = False
-btn_rect = (info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
+btn_rect = pygame.Rect(info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
 
 clock = pygame.time.Clock()
 h.appen(coordin, spns, 'sat', [], [])
@@ -479,10 +484,9 @@ while flag:
         if event.type == pygame.QUIT:
             flag = False
 
-        chkbox.update_checkbox(event)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if pygame.Rect(btn_rect[0], btn_rect[1], btn_rect[2], btn_rect[3]).collidepoint(event.pos):
+            if btn_rect.collidepoint(event.pos):
                 print('!!!!!!!')
                 info_text = ''
                 coor_text = ''
@@ -494,6 +498,14 @@ while flag:
             else:
                 active = False
 
+            chkbox.update_checkbox(event)
+            if chkbox.is_checked():
+                try:
+                    postal_code = address_full(city)['postal code']
+                except Exception as a:
+                    print(a)
+            else:
+                postal_code = ''
 
             color = color_active if active else color_inactive
 
@@ -534,6 +546,7 @@ while flag:
                             except Exception as a:
                                 print(a)
                         h.spn = '8'
+                        city = text
                         text = ''
                         active = False
                     except  Exception as a:
@@ -612,8 +625,8 @@ while flag:
     adr_surface = info_font.render(info_text, True, color_inactive)
     coor_surface = infocoor_font.render(coor_text, True, color_inactive)
     postal_surface = font.render(postal_code, True, color_inactive)
-    chkbox_text = info_font.render('Почтовый индекс', True, color_inactive)
-    btn_text = pygame.font.Font(None, 18).render('Сбросить результаты', True, (0, 255, 255))
+    chkbox_text = pygame.font.Font(None, 15).render('Почтовый индекс', True, color_inactive)
+    btn_text = pygame.font.Font(None, 17).render('Сбросить результаты', True, (0, 255, 255))
 
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
@@ -628,12 +641,11 @@ while flag:
 
     width2 = max(150, adr_surface.get_width() + 5)
     info_rect.w = width2
-    btn_rect = (info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
+    btn_rect = pygame.Rect(info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
 
     pygame.draw.rect(screen, color, input_box, 2)
-    screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
-    screen.blit(chkbox_text, (15 + chkbox.x, chkbox.y - 1))
-    screen.blit(btn_text, (btn_rect[0], btn_rect[1] + 5))
+    screen.blit(chkbox_text, (15 + chkbox.x, chkbox.y + 1))
+    screen.blit(btn_text, (btn_rect.x + (btn_rect.w // 2) - 65, btn_rect.y + 7))
 
 
     chkbox.render_checkbox()
