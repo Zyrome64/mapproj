@@ -384,10 +384,10 @@ class list_of_sputniks:
         coor[0] += x
         coor[1] += y
         print(','.join(map(str, coor)))
-        if coor[0] > 180:
-            coor[0] = 179
-        if coor[0] < 90:
-            coor[0] = 89
+##        if coor[0] > 180:
+##            coor[0] = 179
+##        if coor[0] < 90:
+##            coor[0] = 89
         self.coord = ','.join(map(str, coor))
 
     def add_mark(self, coor):
@@ -460,6 +460,7 @@ info_text = ''
 coor_text = ''
 done = False
 
+btn_rect = (info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
 clock = pygame.time.Clock()
 h.appen(coordin, spns, 'sat', [], [])
 h.appen(coordin, spns, 'map', [], [])
@@ -475,6 +476,12 @@ while flag:
             flag = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if pygame.Rect(btn_rect[0], btn_rect[1], btn_rect[2], btn_rect[3]).collidepoint(event.pos):
+                print('!!!!!!!')
+                info_text = ''
+                coor_text = ''
+                h.markers = []
+                do = True
             if input_box.collidepoint(event.pos):
                 active = not active
             else:
@@ -600,7 +607,7 @@ while flag:
     screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
     screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
     pygame.draw.rect(screen, color, input_box, 2)
-
+    pygame.draw.rect(screen, (255, 0, 0), btn_rect)
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
     clock.tick(FPS)
