@@ -6,7 +6,7 @@ import math
 
 # Ищем город Якутск, ответ просим выдать в формате json.
 
-
+FPS = 20
 
 # Определяем функцию, считающую расстояние между двумя точками, заданными координатами
 def lonlat_distance(a, b):
@@ -409,8 +409,8 @@ class list_of_sputniks:
             response = requests.get(map_request)
 
             if not response:
-                print("Ошибка выполнения запроса:")
-                print(geocoder_request)
+##                print("Ошибка выполнения запроса:")
+##                print(geocoder_request)
                 print("Http статус:", response.status_code, "(", response.reason, ")")
                 sys.exit(1)
         except:
@@ -455,12 +455,13 @@ text = ''
 info_text = ''
 done = False
 
-
+clock = pygame.time.Clock()
 h.appen(coordin, spns, 'sat', [], [])
 h.appen(coordin, spns, 'map', [], [])
 h.appen(coordin, spns, 'sat,skl', [], [])
 screen = pygame.display.set_mode((600, 450))
-shift = (0, 0)
+arrow_keys_pressed = {'up': False, 'down': False, 'right': False, 'left': False}
+##shift = [0, 0]
 flag = True
 do = True
 while flag:
@@ -498,7 +499,10 @@ while flag:
                             float(text.split(',')[0])
                             info_text = address_full(text)['adress']
                         except:
+                            print(address_full(text)['pos'])
                             info_text = address_full(text)['pos']
+##                            h.coord = list(map(float, address_full(text)['pos'].split()))[::-1]
+                            do = True
                         text = ''
                         active = False
                     except  Exception as a:
@@ -516,23 +520,51 @@ while flag:
                 do = True
 
             elif event.key == pygame.K_RIGHT:
-                shift = (0.01, 0)
+                arrow_keys_pressed['right'] = True
+                arrow_keys_pressed['left'] = False
+##                shift[0] = 0.01
             elif event.key == pygame.K_LEFT:
-                shift = (-0.01, 0)
+                arrow_keys_pressed['left'] = True
+                arrow_keys_pressed['right'] = False
+##                shift[0] = -0.01
             elif event.key == pygame.K_UP:
-                shift = (0, 0.01)
+                arrow_keys_pressed['up'] = True
+                arrow_keys_pressed['down'] = False
+##                shift[1] = 0.01
             elif event.key == pygame.K_DOWN:
-                shift = (0, -0.01)
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    shift = (0, 0)
-    if shift != (0, 0):
+                arrow_keys_pressed['down'] = True
+                arrow_keys_pressed['up'] = False
+##                shift[1] = -0.01
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_RIGHT:
+                arrow_keys_pressed['right'] = False
+            elif event.key == pygame.K_LEFT:
+                arrow_keys_pressed['left'] = False
+            elif event.key == pygame.K_UP:
+                arrow_keys_pressed['up'] = False
+            elif event.key == pygame.K_DOWN:
+                arrow_keys_pressed['down'] = False
+##            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+##                shift = [0, 0]
+    if arrow_keys_pressed['right']:
+        h.move(0.01, 0)
         do = True
-        h.move(shift[0], shift[1])
-        shift = (0, 0)
-        if not active:
-            info_text = h.coord
-            
+    elif arrow_keys_pressed['left']:
+        h.move(-0.01, 0)
+        do = True
+    if arrow_keys_pressed['up']:
+        h.move(0, 0.01)
+        do = True
+    elif arrow_keys_pressed['down']:
+        h.move(0, -0.01)
+        do = True
+##    if shift != [0, 0]:
+##        do = True
+##        h.move(shift[0], shift[1])
+##        shift = (0, 0)
+##    if not active:
+##        info_text = h.coord
+        
 
     screen.fill((30, 30, 30))
 
@@ -546,7 +578,7 @@ while flag:
     pygame.draw.rect(screen, (40, 40, 40, 1), info_rect)
 
     txt_surface = font.render(text, True, color)
-    adr_surface = info_font.render(info_text, True, color)
+    adr_surface = info_font.render(info_text, True, color_inactive)
 
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
@@ -558,6 +590,7 @@ while flag:
 
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
+    clock.tick(FPS)
 pygame.quit()
 # Рисуем картинку, загружаемую из только что созданного файла.
 
