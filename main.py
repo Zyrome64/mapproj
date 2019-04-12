@@ -6,7 +6,7 @@ import math
 
 # Ищем город Якутск, ответ просим выдать в формате json.
 
-FPS = 20
+FPS = 60
 
 # Определяем функцию, считающую расстояние между двумя точками, заданными координатами
 def lonlat_distance(a, b):
@@ -403,7 +403,6 @@ class list_of_sputniks:
                         self.host += self.markers[i] + ',pm2rdm~'
                     else:
                         self.host += self.markers[i] + ',pm2rdm'
-                print(self.host)
             if self.lines:
                 self.host += '&pl=c:ec473fFF,f:00FF00A0, w:7'
                 for x in self.lines:
@@ -447,6 +446,7 @@ size = (640, 480)
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font(None, 32)
 info_font = pygame.font.Font(None, 20)
+infocoor_font = pygame.font.Font(None, 13)
 clock = pygame.time.Clock()
 input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
 back_text = pygame.Rect(0, 0, size[0], 42)
@@ -457,6 +457,7 @@ color = color_inactive
 active = False
 text = ''
 info_text = ''
+coor_text = ''
 done = False
 
 clock = pygame.time.Clock()
@@ -503,11 +504,16 @@ while flag:
                             float(text.split(',')[0])
                             info_text = address_full(text)['adress']
                         except:
-                            print(address_full(text)['pos'])
-                            info_text = address_full(text)['pos']
+                            try:
+                                print(address_full(text)['pos'])
+                                info_text = address_full(text)['adress']
+                            except Exception:
+                                pass
                             do = True
+                        coor_text = address_full(text)['pos']
                         h.coord = ','.join(address_full(text)['pos'].split())
-                        h.markers.append(','.join(address_full(text)['pos'].split()))
+                        h.markers = [','.join(address_full(text)['pos'].split())]
+                        h.spn = '8'
                         text = ''
                         active = False
                     except  Exception as a:
@@ -584,6 +590,7 @@ while flag:
 
     txt_surface = font.render(text, True, color)
     adr_surface = info_font.render(info_text, True, color_inactive)
+    coor_surface = infocoor_font.render(coor_text, True, color_inactive)
 
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
@@ -591,6 +598,7 @@ while flag:
 
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
+    screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
     pygame.draw.rect(screen, color, input_box, 2)
 
     # Переключаем экран и ждем закрытия окна.
