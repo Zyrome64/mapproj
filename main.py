@@ -461,6 +461,7 @@ text = ''
 info_text = ''
 coor_text = ''
 done = False
+btn_rect = (info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
 
 clock = pygame.time.Clock()
 h.appen(coordin, spns, 'sat', [], [])
@@ -477,6 +478,12 @@ while flag:
             flag = False
         chkbox.update_checkbox(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if pygame.Rect(btn_rect[0], btn_rect[1], btn_rect[2], btn_rect[3]).collidepoint(event.pos):
+                print('!!!!!!!')
+                info_text = ''
+                coor_text = ''
+                h.markers = []
+                do = True
             if input_box.collidepoint(event.pos):
                 active = not active
             else:
@@ -603,6 +610,7 @@ while flag:
     screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
     pygame.draw.rect(screen, color, input_box, 2)
     chkbox.render_checkbox()
+    pygame.draw.rect(screen, (255, 0, 0), btn_rect)
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
     clock.tick(FPS)
