@@ -1,4 +1,5 @@
 import pygame
+import checkbox
 import requests
 import sys
 import os
@@ -451,6 +452,7 @@ clock = pygame.time.Clock()
 input_box = pygame.Rect(int(size[0] - 250), 5, 140, 32)
 back_text = pygame.Rect(0, 0, size[0], 42)
 info_rect = pygame.Rect(5, 47, 150, 200)
+chkbox = checkbox.Checkbox(screen, info_rect.left + 10, info_rect.bottom - 50)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -473,7 +475,7 @@ while flag:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             flag = False
-
+        chkbox.update_checkbox(event)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if input_box.collidepoint(event.pos):
                 active = not active
@@ -600,7 +602,7 @@ while flag:
     screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
     screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 35))
     pygame.draw.rect(screen, color, input_box, 2)
-
+    chkbox.render_checkbox()
     # Переключаем экран и ждем закрытия окна.
     pygame.display.flip()
     clock.tick(FPS)
