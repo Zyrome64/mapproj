@@ -486,6 +486,7 @@ while flag:
                 print('!!!!!!!')
                 info_text = ''
                 coor_text = ''
+                postal_code = ''
                 h.markers = []
                 do = True
             if input_box.collidepoint(event.pos):
@@ -620,6 +621,11 @@ while flag:
     screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
     screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 25))
     screen.blit(postal_surface, (info_rect.x + 5, info_rect.y + 45))
+
+    width2 = max(150, adr_surface.get_width() + 5)
+    info_rect.w = width2
+    btn_rect = (info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
+
     pygame.draw.rect(screen, color, input_box, 2)
     chkbox.render_checkbox()
     pygame.draw.rect(screen, (255, 0, 0), btn_rect)
