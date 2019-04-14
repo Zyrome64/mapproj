@@ -4,6 +4,7 @@ import sys
 import os
 import math
 import pygame as pg
+from math import sqrt
 
 
 
@@ -491,16 +492,17 @@ class list_of_sputniks:
 
     def update(self):
         try:
+##            print(sqrt(4 ** int(self.spn)), 180 / sqrt(4 ** int(self.spn)))
             self.host = 'http://static-maps.yandex.ru/1.x/?ll={}&z={}&l={}'.format(self.coord, self.spn, self.types[self.index])
             if self.trf:
                 self.host = self.host + ',trf'
             if self.markers:
                 self.host += '&pt='
-                for i in range(len(self.markers)):
-                    if i < len(self.markers) - 1:
-                        self.host += self.markers[i] + ',pm2rdm~'
+                for j in range(len(self.markers)):
+                    if j < len(self.markers) - 1:
+                        self.host += self.markers[j] + ',pm2rdm~'
                     else:
-                        self.host += self.markers[i] + ',pm2rdm'
+                        self.host += self.markers[j] + ',pm2rdm'
             if self.lines:
                 self.host += '&pl=c:ec473fFF,f:00FF00A0, w:7'
                 for x in self.lines:
@@ -540,7 +542,7 @@ h = list_of_sputniks()
 coordin = '144.33067200000022,43.94305'
 spns = '1'
 
-size = (640, 480)
+size = (600, 450)
 screen = pygame.display.set_mode(size)
 font = pygame.font.Font(None, 32)
 info_font = pygame.font.Font(None, 20)
@@ -567,182 +569,189 @@ clock = pygame.time.Clock()
 h.appen(coordin, spns, 'sat', [], [])
 h.appen(coordin, spns, 'map', [], [])
 h.appen(coordin, spns, 'sat,skl', [], [])
-screen = pygame.display.set_mode((600, 450))
+screen = pygame.display.set_mode(size)
 arrow_keys_pressed = {'up': False, 'down': False, 'right': False, 'left': False}
 ##shift = [0, 0]
 flag = True
 do = True
-while flag:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            flag = False
+try:
+    while flag:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                flag = False
 
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if btn_rect.collidepoint(event.pos):
-                print('!!!!!!!')
-                info_text = ''
-                coor_text = ''
-                postal_code = ''
-                h.markers = []
-                do = True
-            if input_box.collidepoint(event.pos):
-                active = not active
-            else:
-                active = False
-
-            chkbox.update_checkbox(event)
-            if chkbox.is_checked():
-                try:
-                    postal_code = address_full(city)['postal code']
-                except Exception as a:
-                    postal_code = 'No PCode'
-            else:
-                postal_code = ''
-
-            color = color_active if active else color_inactive
-
-
-        if event.type == pygame.KEYDOWN:
-            if not active:
-                if event.key == pygame.K_a:
-                    h.index -= 1
-                    if h.index < 0:
-                        h.index = len(h.dat) - 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if btn_rect.collidepoint(event.pos):
+                    print('!!!!!!!')
+                    info_text = ''
+                    coor_text = ''
+                    postal_code = ''
+                    h.markers = []
                     do = True
-                elif event.key == pygame.K_d:
-                    h.index += 1
-                    if h.index > len(h.dat) - 1:
-                        h.index = 0
-                    do = True
-
-                if event.key == pygame.K_t:
-                    h.trf = not h.trf
-                    do = True
-
-            else:
-                if event.key == pygame.K_RETURN:
-                    print(text)
-                    try:
-                        try:
-                            float(text.split(',')[0])
-                            info_text = address_full(text)['adress']
-                        except:
-                            try:
-                                print(address_full(text)['pos'])
-                                info_text = address_full(text)['adress']
-                            except Exception:
-                                pass
-                            do = True
-                        coor_text = address_full(text)['pos']
-                        h.coord = ','.join(address_full(text)['pos'].split())
-                        h.markers = [','.join(address_full(text)['pos'].split())]
-                        if chkbox.is_checked():
-                            try:
-                                postal_code = address_full(text)['postal code']
-                            except Exception as a:
-                                postal_code = 'No PCode'
-                        else:
-                            postal_code = ''
-                        h.spn = '8'
-                        city = text
-                        text = ''
-                        active = False
-                    except  Exception as a:
-                        print(a)
-                elif event.key == pygame.K_BACKSPACE:
-                    text = text[:-1]
+                elif input_box.collidepoint(event.pos):
+                    active = not active
                 else:
-                    text += event.unicode
+                    active = False
+                    info_text = ''
+                    coor_text = ''
+                    postal_code = ''
+                    h.markers = []
+                    mpos = str(float(h.coord.split(',')[0]) + (180 / sqrt(4 ** int(h.spn))) / size[0] * (event.pos[0] if event.pos[0] > size[0] // 2 else -event.pos[0])) + ',' \
+                                 + str(float(h.coord.split(',')[1]) + (180 / sqrt(4 ** int(h.spn))) / size[1] * (-event.pos[1] if event.pos[1] > size[1] // 2 else -event.pos[1]))
+                    
+                    print(h.spn)
+                    print(mpos)
+##                    print(repr(h.spn), repr(h.coord[0]), repr(h.coord[1]))
+                    h.add_mark(mpos)
+                    do = True
 
-            if event.key == pygame.K_PAGEUP:
-                h.pg_updn(False)
-                do = True
-            elif event.key == pygame.K_PAGEDOWN:
-                h.pg_updn(True)
-                do = True
+                chkbox.update_checkbox(event)
+                if chkbox.is_checked():
+                    try:
+                        postal_code = address_full(city)['postal code']
+                    except Exception as a:
+                        postal_code = 'No PCode'
+                else:
+                    postal_code = ''
 
-            elif event.key == pygame.K_RIGHT:
-                arrow_keys_pressed['right'] = True
-                arrow_keys_pressed['left'] = False
-##                shift[0] = 0.01
-            elif event.key == pygame.K_LEFT:
-                arrow_keys_pressed['left'] = True
-                arrow_keys_pressed['right'] = False
-##                shift[0] = -0.01
-            elif event.key == pygame.K_UP:
-                arrow_keys_pressed['up'] = True
-                arrow_keys_pressed['down'] = False
-##                shift[1] = 0.01
-            elif event.key == pygame.K_DOWN:
-                arrow_keys_pressed['down'] = True
-                arrow_keys_pressed['up'] = False
-##                shift[1] = -0.01
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                arrow_keys_pressed['right'] = False
-            elif event.key == pygame.K_LEFT:
-                arrow_keys_pressed['left'] = False
-            elif event.key == pygame.K_UP:
-                arrow_keys_pressed['up'] = False
-            elif event.key == pygame.K_DOWN:
-                arrow_keys_pressed['down'] = False
-    if arrow_keys_pressed['right']:
-        h.move(0.01, 0)
-        do = True
-    elif arrow_keys_pressed['left']:
-        h.move(-0.01, 0)
-        do = True
-    if arrow_keys_pressed['up']:
-        h.move(0, 0.01)
-        do = True
-    elif arrow_keys_pressed['down']:
-        h.move(0, -0.01)
-        do = True
-        
-
-    screen.fill((30, 30, 30))
-
-    if do:
-        h.update()
-        do = False
-
-    screen.blit(h.dat[h.index], (0, 0))
-
-    pygame.draw.rect(screen,  (40, 40, 40, 1), back_text)
-    pygame.draw.rect(screen, (40, 40, 40, 1), info_rect)
-
-    txt_surface = font.render(text, True, color)
-    adr_surface = info_font.render(info_text, True, color_inactive)
-    coor_surface = infocoor_font.render(coor_text, True, color_inactive)
-    postal_surface = font.render(postal_code, True, color_inactive)
-    chkbox_text = pygame.font.Font(None, 15).render('Почтовый индекс', True, color_inactive)
-    btn_text = pygame.font.Font(None, 17).render('Сбросить результаты', True, (0, 255, 255))
-
-    width = max(200, txt_surface.get_width() + 10)
-    input_box.w = width
-    input_box.x = int(size[0] - input_box.w - 50)
-
-    pygame.draw.rect(screen, color, input_box, 2)
-    pygame.draw.rect(screen, (255, 0, 0), btn_rect)
-    screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-    screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
-    screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 25))
-    screen.blit(postal_surface, (info_rect.x + 5, info_rect.y + 45))
-
-    width2 = max(150, adr_surface.get_width() + 5)
-    info_rect.w = width2
-    btn_rect = pygame.Rect(info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
-
-    pygame.draw.rect(screen, color, input_box, 2)
-    screen.blit(chkbox_text, (15 + chkbox.x, chkbox.y + 1))
-    screen.blit(btn_text, (btn_rect.x + (btn_rect.w // 2) - 65, btn_rect.y + 7))
+                color = color_active if active else color_inactive
 
 
-    chkbox.render_checkbox()
+            if event.type == pygame.KEYDOWN:
+                if not active:
+                    if event.key == pygame.K_a:
+                        h.index -= 1
+                        if h.index < 0:
+                            h.index = len(h.dat) - 1
+                        do = True
+                    elif event.key == pygame.K_d:
+                        h.index += 1
+                        if h.index > len(h.dat) - 1:
+                            h.index = 0
+                        do = True
+
+                    if event.key == pygame.K_t:
+                        h.trf = not h.trf
+                        do = True
+
+                else:
+                    if event.key == pygame.K_RETURN:
+                        print(text)
+                        result = address_full(text)
+                        if result != {}:
+                            if 'adress' in result.keys():
+                                info_text = address_full(text)['adress']
+
+                            if 'pos' in result.keys():
+                                print(address_full(text)['pos'])
+                                
+                                coor_text = address_full(text)['pos']
+                                h.coord = ','.join(address_full(text)['pos'].split())
+                                h.markers = [','.join(address_full(text)['pos'].split())]
+                            if chkbox.is_checked() and 'postal code' in result.keys():
+                                postal_code = address_full(text)['postal code']
+                            else:
+                                postal_code = ''
+                            h.spn = '8'
+                            city = text
+                            text = ''
+                            active = False
+                            do = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode
+
+                if event.key == pygame.K_PAGEUP:
+                    h.pg_updn(False)
+                    do = True
+                elif event.key == pygame.K_PAGEDOWN:
+                    h.pg_updn(True)
+                    do = True
+
+                elif event.key == pygame.K_RIGHT:
+                    arrow_keys_pressed['right'] = True
+                    arrow_keys_pressed['left'] = False
+    ##                shift[0] = 0.01
+                elif event.key == pygame.K_LEFT:
+                    arrow_keys_pressed['left'] = True
+                    arrow_keys_pressed['right'] = False
+    ##                shift[0] = -0.01
+                elif event.key == pygame.K_UP:
+                    arrow_keys_pressed['up'] = True
+                    arrow_keys_pressed['down'] = False
+    ##                shift[1] = 0.01
+                elif event.key == pygame.K_DOWN:
+                    arrow_keys_pressed['down'] = True
+                    arrow_keys_pressed['up'] = False
+    ##                shift[1] = -0.01
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    arrow_keys_pressed['right'] = False
+                elif event.key == pygame.K_LEFT:
+                    arrow_keys_pressed['left'] = False
+                elif event.key == pygame.K_UP:
+                    arrow_keys_pressed['up'] = False
+                elif event.key == pygame.K_DOWN:
+                    arrow_keys_pressed['down'] = False
+        if arrow_keys_pressed['right']:
+            h.move(0.01, 0)
+            do = True
+        elif arrow_keys_pressed['left']:
+            h.move(-0.01, 0)
+            do = True
+        if arrow_keys_pressed['up']:
+            h.move(0, 0.01)
+            do = True
+        elif arrow_keys_pressed['down']:
+            h.move(0, -0.01)
+            do = True
+            
+
+        screen.fill((30, 30, 30))
+
+        if do:
+            h.update()
+            do = False
+
+        screen.blit(h.dat[h.index], (0, 0))
+
+        pygame.draw.rect(screen,  (40, 40, 40, 1), back_text)
+        pygame.draw.rect(screen, (40, 40, 40, 1), info_rect)
+
+        txt_surface = font.render(text, True, color)
+        adr_surface = info_font.render(info_text, True, color_inactive)
+        coor_surface = infocoor_font.render(coor_text, True, color_inactive)
+        postal_surface = font.render(postal_code, True, color_inactive)
+        chkbox_text = pygame.font.Font(None, 15).render('Почтовый индекс', True, color_inactive)
+        btn_text = pygame.font.Font(None, 17).render('Сбросить результаты', True, (0, 255, 255))
+
+        width = max(200, txt_surface.get_width() + 10)
+        input_box.w = width
+        input_box.x = int(size[0] - input_box.w - 50)
+
+        pygame.draw.rect(screen, color, input_box, 2)
+        pygame.draw.rect(screen, (255, 0, 0), btn_rect)
+        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+        screen.blit(adr_surface, (info_rect.x + 5, info_rect.y + 5))
+        screen.blit(coor_surface, (info_rect.x + 5, info_rect.y + 25))
+        screen.blit(postal_surface, (info_rect.x + 5, info_rect.y + 45))
+
+        width2 = max(150, adr_surface.get_width() + 5)
+        info_rect.w = width2
+        btn_rect = pygame.Rect(info_rect.left + 5, info_rect.bottom - 30, info_rect.width - 10, 25)
+
+        pygame.draw.rect(screen, color, input_box, 2)
+        screen.blit(chkbox_text, (15 + chkbox.x, chkbox.y + 1))
+        screen.blit(btn_text, (btn_rect.x + (btn_rect.w // 2) - 65, btn_rect.y + 7))
 
 
-    # Переключаем экран и ждем закрытия окна.
-    pygame.display.flip()
-    clock.tick(FPS)
-pygame.quit()
+        chkbox.render_checkbox()
+
+
+        # Переключаем экран и ждем закрытия окна.
+        pygame.display.flip()
+        clock.tick(FPS)
+finally:
+    pygame.quit()
